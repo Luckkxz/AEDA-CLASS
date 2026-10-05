@@ -70,6 +70,29 @@ static void deque_example_3() {
     std::cout << std::format("d1 <= d2: {:s}", d1 <=d2) << std::endl;
     std::cout << std::format("d1 >= d2: {:s}", d1 >= d2) << std::endl;
 }
+static void deque_example_5() {
+    constexpr size_t epl_max{10};
+    constexpr double rem_val{-1.0};
+    std::deque<double> d1{10.0 ,20.0 ,rem_val , 30.0 , 40.0 , rem_val,60.0,70.0};
+    std::deque<double> d2(d1);
+    print_container("d1 ( initial values ):",d1,epl_max);
+    std::cout<<std::format("d1.size() : {}",d1.size())<<std::endl;
+    //std::ranges::remove
+    auto removed_elements = std::ranges::remove(d1,rem_val);
+    print_container("d1 after remove) : ",d1,epl_max);
+    std::cout<<std::format("d1.size() : {}",d1.size())<<std::endl;
+    print_container("d1 removed elements : {}",removed_elements,epl_max);removed_elements;
+    std::cout<<std::format("removed_elements.size(): {}" ,removed_elements.size())<<std::endl;
+    //borrar
+    d1.erase(removed_elements.begin(),d1.end());
+    print_container("d1 (after erase ) :",d1,epl_max);
+    std::cout<<std::format("d1.size() : {}",d1.size())<<std::endl;
+    //std::erase
+    print_container("d2 (initial values ):",d2,epl_max);
+    std::cout<<std::format("d2.size() : {}",d2.size())<<std::endl;
+    auto erased_elements_number = std::erase(d2,rem_val);
+    std::cout<<"erased_elements_number : {}",erased_elements_number<<std::endl;
+}
 int main() {
     std::cout << "Deque !!! " << std::endl;
    // deque_example_1();
