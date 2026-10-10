@@ -396,6 +396,8 @@ void leccion_12_erase_remove_idiom() {
     // METODO CLASICO: Erase-Remove Idiom
     // Paso 1: remove solo reordena, no cambia el size!
     auto sobrantes = std::ranges::remove(v1, BASURA);
+    for (double y : v1) std::cout << y << " ";
+    std::cout << std::endl;
     std::cout << "Tras ranges::remove -> size sigue siendo: " << v1.size() << " (NO se redujo!)" << std::endl;
 
     // Paso 2: erase borra fisicamente la cola de basura

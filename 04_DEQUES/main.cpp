@@ -91,7 +91,7 @@ static void deque_example_5() {
     print_container("d2 (initial values ):",d2,epl_max);
     std::cout<<std::format("d2.size() : {}",d2.size())<<std::endl;
     auto erased_elements_number = std::erase(d2,rem_val);
-    std::cout<<"erased_elements_number : {}",erased_elements_number<<std::endl;
+    std::cout<<std::format("erased_elements_number : {}\n", erased_elements_number);
 }
 int main() {
     std::cout << "Deque !!! " << std::endl;
