@@ -1,6 +1,8 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
+#include <array>
 #include <format>
 #include <vector>
 #include <stdexcept>
@@ -12,7 +14,7 @@
 
 // ============================================================================
 // LECCION 28: Arquitectura de std::map y la estructura std::pair
-// ¿Cómo se almacena la pareja Clave-Valor en el árbol?
+// ¿Como se almacena la pareja Clave-Valor en el arbol?
 // ============================================================================
 void leccion_28_arquitectura_map_pair() {
     std::cout << "\n==================================================" << std::endl;
@@ -21,8 +23,8 @@ void leccion_28_arquitectura_map_pair() {
 
     /*
      * ARQUITECTURA DE std::map:
-     * Al igual que std::set, se implementa sobre un ÁRBOL ROJO-NEGRO (Red-Black Tree).
-     * Pero cada nodo del árbol no guarda un solo dato, sino un:
+     * Al igual que std::set, se implementa sobre un ARBOL ROJO-NEGRO (Red-Black Tree).
+     * Pero cada nodo del arbol no guarda un solo dato, sino un:
      *
      *            std::pair<const Key, Value>
      *
@@ -31,13 +33,13 @@ void leccion_28_arquitectura_map_pair() {
      *   [ .first = "DNI_050" | "Ana" ]    [ .first = "DNI_150" | "Pedro" ]
      *
      * PUNTOS CLAVE DE EXAMEN:
-     * 1. ¿En función de qué componente se ordena el árbol?
+     * 1. ¿En funcion de que componente se ordena el arbol?
      *    UNICAMENTE en base a la CLAVE (.first) usando std::less<Key>.
-     *    El valor (.second) es solo "carga útil" (payload); no interviene en el orden.
+     *    El valor (.second) es solo "carga util" (payload); no interviene en el orden.
      *
-     * 2. ¿Por qué la clave es `const Key`?
-     *    Si cambiaras la clave de un nodo existente, romperías la posición ordenada
-     *    del árbol.
+     * 2. ¿Por que la clave es `const Key`?
+     *    Si cambiaras la clave de un nodo existente, romperias la posicion ordenada
+     *    del arbol.
      *
      * 3. Structured Binding (C++17/20):
      *    Permite desempaquetar limpiamente:
@@ -50,7 +52,7 @@ void leccion_28_arquitectura_map_pair() {
         {102, "Software"}
     };
 
-    // Imprime ordenado automáticamente por clave ascendente (101, 102, 105):
+    // Imprime ordenado automaticamente por clave ascendente (101, 102, 105):
     std::cout << "Map recorrido con structured binding (ordenado por clave):" << std::endl;
     for (const auto& [cod, carrera] : codigos) {
         std::cout << std::format("  Clave: {:3d} -> Carrera: {:s}", cod, carrera) << std::endl;
@@ -76,14 +78,14 @@ void leccion_29_operator_corchetes_vs_at() {
      * 1. operator[k]:
      *    - Si la clave 'k' EXISTE: Devuelve una referencia mutable a su valor asociado.
      *    - Si la clave 'k' NO EXISTE:
-     *      ¡INSERTA AUTOMÁTICAMENTE una nueva pareja con la clave 'k' y el valor
+     *      ¡INSERTA AUTOMATICAMENTE una nueva pareja con la clave 'k' y el valor
      *      inicializado por defecto (ej: 0 para enteros, "" para strings)!
      *    - CONSECUENCIA DIRECTA: operator[] NUNCA puede usarse sobre un mapa const.
      *
      * 2. at(k):
      *    - Si la clave 'k' EXISTE: Devuelve la referencia al valor asociado.
      *    - Si la clave 'k' NO EXISTE:
-     *      LANZA UNA EXCEPCIÓN capturable de tipo `std::out_of_range`.
+     *      LANZA UNA EXCEPCION capturable de tipo `std::out_of_range`.
      *      NUNCA altera ni inserta elementos en el mapa.
      *    - SI puede usarse sobre mapas const.
      */
@@ -99,26 +101,23 @@ void leccion_29_operator_corchetes_vs_at() {
 
     // 2. operator[] con clave inexistente:
     std::cout << "Tamano de notas ANTES de consultar clave inexistente: " << notas.size() << std::endl;
-    int nota_fantasma = notas["AlumnoNuevo"]; // ¡LO INSERTA CON NOTA 0 AUTOMÁTICAMENTE!
+    int nota_fantasma = notas["AlumnoNuevo"]; // ¡LO INSERTA CON NOTA 0 AUTOMATICAMENTE!
     std::cout << "notas[\"AlumnoNuevo\"]: " << nota_fantasma << " (auto-insertado con 0)" << std::endl;
     std::cout << "Tamano de notas DESPUES de operator[]: " << notas.size() << " (aumento a 3!)" << std::endl;
 
-    // 3. at() seguro con comprobación y excepciones:
+    // 3. at() seguro con comprobacion y excepciones:
     std::cout << "\nAcceso seguro con at():" << std::endl;
     try {
-        std::cout << "notas.at(\"Carlos\"): " << notas.at("Carlos") << std::endl;
-        std::cout << "Intentando notas.at(\"Inexistente\")..." << std::endl;
-        std::cout << notas.at("Inexistente") << std::endl; // Lanza std::out_of_range
+        std::cout << "Nota de Carlos: " << notas.at("Carlos") << std::endl;
+        std::cout << "Consultando 'Desconocido': " << notas.at("Desconocido") << std::endl;
     } catch (const std::out_of_range& e) {
-        std::cout << "-> Excepcion capturada correctamente: std::out_of_range ("
-                  << e.what() << ")" << std::endl;
-        std::cout << "Tamano de notas tras fallo de at(): " << notas.size()
-                  << " (NO se modifico el mapa)" << std::endl;
+        std::cout << "¡Excepcion capturada con exito! Mensaje: " << e.what() << std::endl;
+        std::cout << "El mapa no fue alterado por at(). Tamano sigue siendo: " << notas.size() << std::endl;
     }
 }
 
 // ============================================================================
-// LECCION 30: Inserción Controlada: insert() vs insert_or_assign()
+// LECCION 30: Insercion Controlada: insert() vs insert_or_assign()
 // ============================================================================
 void leccion_30_insercion_controlada() {
     std::cout << "\n==================================================" << std::endl;
@@ -126,69 +125,86 @@ void leccion_30_insercion_controlada() {
     std::cout << "==================================================" << std::endl;
 
     /*
-     * DIFERENCIA DE SOBREESCRITURA:
-     * - m.insert({k, v}):
-     *   Si la clave ya existe, NO LA SOBREESCRIBE (conserva el valor anterior)
-     *   y retorna pair<it, false>.
-     * - m.insert_or_assign(k, v) (C++17):
-     *   Si no existe la inserta; si existe, ACTUALIZA su valor explícitamente.
+     * RETORNO DE m.insert({k, v}):
+     * Devuelve `std::pair<iterator, bool>`:
+     * - iterador: apunta al elemento (nuevo o ya existente).
+     * - bool: true si se inserto exitosamente, false si la clave YA EXISTIA.
+     *
+     * Si la clave ya existia, insert() NO SOBREESCRIBE EL VALOR.
+     *
+     * insert_or_assign() (C++17):
+     * Si existe, actualiza el valor (.second).
+     * Si no existe, lo inserta nuevo.
+     * Devuelve tambien std::pair<iterator, bool> donde bool indica si fue insercion nueva (true)
+     * o solo asignacion/actualizacion (false).
      */
 
-    std::map<int, std::string> inventario{
-        {1, "Teclado"},
-        {2, "Mouse"}
-    };
+    std::map<std::string, double> precios;
 
-    // 1. Intento de insert con clave existente:
-    auto [it1, exito1] = inventario.insert({1, "Teclado Mecanico RGB"});
-    std::cout << std::format("insert clave 1 repetida -> Exito: {}, Valor en mapa: {}",
-                             exito1, it1->second) << " (NO SOBREESCRIBIO)" << std::endl;
+    // Primer intento: insercion exitosa
+    auto [it1, ok1] = precios.insert({"Manzana", 2.50});
+    std::cout << std::format("Insert 'Manzana': {} (precio: {:.2f})", ok1 ? "EXITO" : "FALLO", it1->second) << std::endl;
 
-    // 2. Uso de insert_or_assign (C++17):
-    auto [it2, exito2] = inventario.insert_or_assign(1, "Teclado Mecanico RGB");
-    std::cout << std::format("insert_or_assign clave 1 -> Fue nueva insercion: {}, Valor en mapa: {}",
-                             exito2, it2->second) << " (SI SOBREESCRIBIO)" << std::endl;
+    // Segundo intento con misma clave pero distinto precio:
+    auto [it2, ok2] = precios.insert({"Manzana", 4.00});
+    std::cout << std::format("Insert 'Manzana' con 4.00: {} (precio retenido: {:.2f})",
+                             ok2 ? "EXITO" : "FALLO (ya existia)", it2->second) << std::endl;
+
+    // Con insert_or_assign():
+    auto [it3, ok3] = precios.insert_or_assign("Manzana", 4.50);
+    std::cout << std::format("insert_or_assign 'Manzana' con 4.50: Nuevo={} (precio actual: {:.2f})",
+                             ok3 ? "SI (nueva clave)" : "NO (actualizado)", it3->second) << std::endl;
 }
 
 // ============================================================================
-// LECCION 31: Búsqueda Logarítmica y Borrado
+// LECCION 31: Busqueda Logaritmica y Borrado
 // ============================================================================
 void leccion_31_busqueda_borrado() {
     std::cout << "\n==================================================" << std::endl;
     std::cout << "LECCION 31: Busqueda O(log n) con find(), contains() y erase()" << std::endl;
     std::cout << "==================================================" << std::endl;
 
-    std::map<std::string, double> precios{
-        {"Manzana", 2.50},
-        {"Platano", 1.80},
-        {"Naranja", 3.20},
-        {"Fresa", 5.00}
+    /*
+     * METODOS DE BUSQUEDA EN std::map:
+     *
+     * 1. m.find(clave) -> O(log n)
+     *    Devuelve iterador al nodo si existe; si no, devuelve m.end().
+     *    ¡NUNCA uses std::find(m.begin(), m.end(), ...) porque seria O(n)!
+     *
+     * 2. m.contains(clave) -> O(log n) [Desde C++20]
+     *    Devuelve simplemente bool (true/false).
+     *
+     * 3. m.count(clave) -> O(log n)
+     *    En std::map solo puede ser 0 o 1 (porque las claves son unicas).
+     */
+
+    std::map<int, std::string> servidores{
+        {80, "HTTP"},
+        {443, "HTTPS"},
+        {22, "SSH"},
+        {21, "FTP"}
     };
 
-    // 1. find(clave): O(log n)
-    auto it = precios.find("Platano");
-    if (it != precios.end()) {
-        std::cout << std::format("find(\"Platano\") -> Clave: {}, Precio: S/. {:.2f}",
-                                 it->first, it->second) << std::endl;
+    // Busqueda moderna con contains():
+    if (servidores.contains(443)) {
+        std::cout << "Puerto 443 disponible: " << servidores[443] << std::endl;
     }
 
-    // 2. contains(clave) (C++20):
-    std::cout << "precios.contains(\"Fresa\"): " << precios.contains("Fresa") << std::endl;
-    std::cout << "precios.contains(\"Mango\"): " << precios.contains("Mango") << std::endl;
+    // Busqueda tradicional con find():
+    auto it = servidores.find(22);
+    if (it != servidores.end()) {
+        std::cout << std::format("find(): Servidor encontrado -> Puerto {} : {}", it->first, it->second) << std::endl;
+    }
 
-    // 3. erase(clave): Borra la pareja y retorna 1 si existía o 0 si no existía:
-    size_t borrados = precios.erase("Naranja");
-    std::cout << "precios.erase(\"Naranja\") -> Eliminados: " << borrados << std::endl;
-
-    // 4. clear(): Vacia todo el arbol liberando todos los nodos:
-    precios.clear();
-    std::cout << "Tras precios.clear() -> size = " << precios.size()
-              << ", empty = " << (precios.empty() ? "true" : "false") << std::endl;
+    // Borrado por clave: erase(clave) devuelve el numero de elementos borrados (0 o 1)
+    size_t eliminados = servidores.erase(21);
+    std::cout << std::format("erase(21): {} elemento(s) eliminado(s)", eliminados) << std::endl;
+    std::cout << "contains(21) tras borrado: " << (servidores.contains(21) ? "true" : "false") << std::endl;
 }
 
 // ============================================================================
 // LECCION 32: std::multimap (Mapeo Uno-a-Muchos)
-// ¿Por qué std::multimap NO TIENE operator[] ni at()?
+// ¿Por que std::multimap NO TIENE operator[] ni at()?
 // ============================================================================
 void leccion_32_multimap() {
     std::cout << "\n==================================================" << std::endl;
@@ -259,11 +275,146 @@ void leccion_33_gran_resumen_stl() {
 +-----------------+-----------------------+---------------------+---------------------+--------------------+
 )" << std::endl;
 
-    std::cout << "¡RECORDATORIO DE AUDIO DEL PROFESOR!" << std::endl;
+    std::cout << "RECORDATORIO DE AUDIO DEL PROFESOR:" << std::endl;
     std::cout << "-> ¿Cuando NO usar asociativos (set/map)? Cuando necesites preservar" << std::endl;
     std::cout << "   estrictamente el orden cronologico de llegada de los datos." << std::endl;
     std::cout << "-> ¿Cual tiene mejor localidad de cache espacial? std::vector (por contiguidad)." << std::endl;
     std::cout << "-> ¿Cual no invalida iteradores al insertar/borrar nodos? std::list." << std::endl;
+}
+
+// ============================================================================
+// LECCION 34: Insercion de Alto Rendimiento: try_emplace() vs emplace()
+// (¡OPTIMIZACION CLAVE C++17/20 VISTA EN EL EJEMPLO 2 DE CLASE!)
+// ============================================================================
+void leccion_34_try_emplace_vs_emplace() {
+    std::cout << "\n==================================================" << std::endl;
+    std::cout << "LECCION 34: try_emplace() vs emplace() (Optimizacion Clave)" << std::endl;
+    std::cout << "==================================================" << std::endl;
+
+    /*
+     * ¿CUAL ES LA DIFERENCIA ENTRE emplace() Y try_emplace()?
+     *
+     * 1. m.emplace(k, v) / m.emplace(pair):
+     *    - Intenta insertar la pareja.
+     *    - ¡PROBLEMA POTENCIAL!: Si la clave ya existe, la insercion se rechaza,
+     *      pero los argumentos temporales pasados a emplace() PUEDEN HABER SIDO
+     *      CONSTRUIDOS O MOVIDOS innecesariamente antes de verificar la clave.
+     *
+     * 2. m.try_emplace(key, args_for_value...):
+     *    - Evalua PRIMERO si la clave 'key' ya existe en el arbol.
+     *    - Si la clave YA EXISTE: ¡NO HACE NADA! No construye el valor ni mueve
+     *      ningun argumento pasado. Cero coste de construccion/movimiento.
+     *    - Si la clave NO EXISTE: Construye el valor in-place pasando 'args_for_value...'
+     *      directamente al constructor del tipo Value.
+     *    - Retorna: std::pair<iterator, bool> (igual que insert y emplace).
+     *
+     * 3. CLAVES std::string_view:
+     *    - std::string_view es una vista no propietaria de una cadena (puntero + longitud).
+     *    - Ideal para claves de busqueda o literales estaticos: ¡CERO COPIAS EN EL HEAP!
+     */
+
+    std::map<std::string_view, std::string> aeropuertos{
+        {"ORD", "O'Hare International (Chicago)"},
+        {"LHR", "Heathrow Airport (London)"},
+        {"LIM", "Jorge Chavez International (Lima)"}
+    };
+
+    std::cout << "Aeropuertos iniciales: " << aeropuertos.size() << std::endl;
+
+    // Intento 1 con try_emplace (clave NUEVA):
+    auto [it1, ok1] = aeropuertos.try_emplace("DXB", "Dubai International Airport");
+    std::cout << std::format("try_emplace('DXB'): Exito={} -> [{}, {}]",
+                             ok1 ? "SI" : "NO", it1->first, it1->second) << std::endl;
+
+    // Intento 2 con try_emplace (clave YA EXISTENTE):
+    // La cadena "Nuevo Lima" NUNCA se asigna ni altera el valor existente:
+    auto [it2, ok2] = aeropuertos.try_emplace("LIM", "Nuevo Lima Internacional");
+    std::cout << std::format("try_emplace('LIM' duplicado): Exito={} -> Retenido: [{}]",
+                             ok2 ? "SI" : "NO (Rechazado sin construir)", it2->second) << std::endl;
+
+    std::cout << "Total aeropuertos despues de try_emplace: " << aeropuertos.size() << std::endl;
+}
+
+// ============================================================================
+// LECCION 35: std::multimap Avanzado: find() con bucle vs equal_range()
+// (TRAMPAS Y PATRONES DEL EJEMPLO 4 DE CLASE)
+// ============================================================================
+void leccion_35_multimap_avanzado() {
+    std::cout << "\n==================================================" << std::endl;
+    std::cout << "LECCION 35: multimap: find() + bucle vs equal_range()" << std::endl;
+    std::cout << "==================================================" << std::endl;
+
+    /*
+     * PATRONES DE RECORRIDO DE CLAVES DUPLICADAS EN std::multimap:
+     *
+     * Un multimap almacena elementos con la misma clave de forma CONTIGUA en el
+     * recorrido in-order del arbol. Por tanto, todas las entradas con clave K estan juntos.
+     *
+     * METODO A: find(k) + bucle while (como en multimap_example_4):
+     *    auto iter = mm.find(k);
+     *    if (iter != mm.end()) {
+     *        while (iter != mm.end() && iter->first == k) {
+     *            // procesar
+     *            ++iter;
+     *        }
+     *    }
+     *    ¡CUIDADO CON EL INCREMENTO!: Si llegas a mm.end(), no debes desreferenciar iter->first.
+     *
+     * METODO B: equal_range(k) (Forma Canonica y Mas Segura en C++):
+     *    auto [primero, ultimo] = mm.equal_range(k);
+     *    // Devuelve el rango semi-abierto [primero, ultimo).
+     *    // Si la clave NO existe, primero == ultimo.
+     *    for (auto it = primero; it != ultimo; ++it) {
+     *        // procesar it->second
+     *    }
+     *
+     * ¡TRAMPA DE EXAMEN!:
+     * En multimap_example_4 del profesor, el codigo comprobaba:
+     *   `if (p.first->first != key)`
+     * ¡PELIGRO! Si la clave NO existe y el multimap esta vacio o p.first == mm.end(),
+     * desreferenciar `p.first->first` causa UNDEFINED BEHAVIOR / CRASH.
+     * La forma correcta y segura SIEMPRE es comprobar:
+     *   `if (p.first == p.second)` // Rango vacio = no encontrado!
+     */
+
+    using multimap_ciudades = std::multimap<std::string_view, std::string>;
+
+    multimap_ciudades ciudades{
+        {"Peru", "Lima"},
+        {"Peru", "Arequipa"},
+        {"Peru", "Cusco"},
+        {"Brasil", "Sao Paulo"},
+        {"Brasil", "Rio de Janeiro"},
+        {"Chile", "Santiago"}
+    };
+
+    std::array<std::string_view, 3> paises_buscar{"Peru", "Chile", "Argentina"};
+
+    std::cout << "\n--- METODO 1: Bucle while con find() ---" << std::endl;
+    for (const auto& pais : paises_buscar) {
+        std::cout << std::format("Buscando pais '{}':", pais) << std::endl;
+        if (auto it = ciudades.find(pais); it != ciudades.end()) {
+            while (it != ciudades.end() && it->first == pais) {
+                std::cout << std::format("  -> [{}, {}]", it->first, it->second) << std::endl;
+                ++it;
+            }
+        } else {
+            std::cout << "  -> ¡No encontrado!" << std::endl;
+        }
+    }
+
+    std::cout << "\n--- METODO 2: Rango seguro con equal_range() ---" << std::endl;
+    for (const auto& pais : paises_buscar) {
+        std::cout << std::format("Buscando pais '{}' con equal_range():", pais) << std::endl;
+        auto [primero, ultimo] = ciudades.equal_range(pais);
+        if (primero == ultimo) {
+            std::cout << "  -> ¡Rango vacio (No encontrado)!" << std::endl;
+        } else {
+            for (auto it = primero; it != ultimo; ++it) {
+                std::cout << std::format("  -> Ciudad: {}", it->second) << std::endl;
+            }
+        }
+    }
 }
 
 int main() {
@@ -277,6 +428,8 @@ int main() {
     leccion_31_busqueda_borrado();
     leccion_32_multimap();
     leccion_33_gran_resumen_stl();
+    leccion_34_try_emplace_vs_emplace();
+    leccion_35_multimap_avanzado();
 
     return 0;
 }
